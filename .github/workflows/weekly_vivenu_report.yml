@@ -2,8 +2,7 @@ name: Weekly Vivenu Report
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # 02:00 AM ET (07:00 UTC) daily
-    - cron: '5 7 * * *'   # 02:05 AM ET (07:05 UTC) daily
+    - cron: '0 17 * * 1'   # 02:00 AM ET (07:00 UTC) daily
   workflow_dispatch:    # allow manual run from GitHub
 
 jobs:
