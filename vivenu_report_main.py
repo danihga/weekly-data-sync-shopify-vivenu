@@ -9,7 +9,7 @@ from msal import ConfidentialClientApplication
 
 load_dotenv()
 
-VIVENU_API_KEY = os.getenv("TEST")
+VIVENU_API_KEY = os.getenv("VIVENU_API_KEY")
 headers = {
     "Authorization": f"Bearer {VIVENU_API_KEY}",
     "Accept": "application/json"
