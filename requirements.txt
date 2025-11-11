@@ -1,0 +1,11 @@
+# Core
+python-dotenv==1.0.1
+requests==2.31.0
+msal==1.29.0
+pandas==2.2.2
+
+# Optional: for scheduling or GitHub Actions (if you later automate it)
+#schedule==1.2.1
+
+# Optional: if you use Jupyter / local testing
+ipykernel==6.29.0
