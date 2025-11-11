@@ -1,0 +1,38 @@
+name: Weekly Vivenu Report
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 02:00 AM ET (07:00 UTC) daily
+    - cron: '5 7 * * *'   # 02:05 AM ET (07:05 UTC) daily
+  workflow_dispatch:    # allow manual run from GitHub
+
+jobs:
+  weekly-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Vivenu report script
+        env:
+          VIVENU_API_KEY: ${{ secrets.VIVENU_API_KEY }}
+          OUTLOOK_CLIENT_ID: ${{ secrets.OUTLOOK_CLIENT_ID }}
+          OUTLOOK_TENANT_ID: ${{ secrets.OUTLOOK_TENANT_ID }}
+          OUTLOOK_CLIENT_SECRET: ${{ secrets.OUTLOOK_CLIENT_SECRET }}
+          OUTLOOK_USER_EMAIL: ${{ secrets.OUTLOOK_USER_EMAIL }}
+        run: |
+          source .venv/bin/activate
+          python vivenu_report_main.py
