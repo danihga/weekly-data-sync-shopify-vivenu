@@ -274,4 +274,4 @@ if __name__ == "__main__":
     )
 
     # Send to Gmail recipient
-    send_outlook_email(subject, html, recipient="danidhg00@gmail.com")
+    send_outlook_email(subject, html, recipient="daniel.delasheras@longislandsc.com")
