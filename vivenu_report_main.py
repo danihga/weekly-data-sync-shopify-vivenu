@@ -339,7 +339,7 @@ if __name__ == "__main__":
     # Send to Gmail recipient
     send_outlook_email(subject, 
                        html, 
-                       recipient="danidhg00@gmail.com",
+                       recipient="fred.popp@globallconcepts.com",
                        cc=['daniel.delasheras@longislandsc.com'])
     print("Subject:", subject)
     print("HTML Body:", html)   
