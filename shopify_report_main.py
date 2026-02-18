@@ -130,7 +130,7 @@ def render_shopify_report_email_html(
       <li><strong>Total Revenue:</strong> {fmt_money(total_revenue)}</li>
     </ul>
 
-    <h4 style="margin-bottom:4px;">Sales Breakdown per Item</h4>
+    <h4 style="margin-bottom:4px;">Sales Breakdown per Item</h4><br>
     {breakdown_html}
     """
     return subject, html

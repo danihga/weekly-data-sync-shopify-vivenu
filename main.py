@@ -66,7 +66,11 @@ def build_html_email(vivenu_total_transactions, vivenu_week_transactions, shopif
     return combined_subject, combined_html
 
 @task
-def load_data(subject, html_content, recipient_email:str='daniel.delasheras@longislandsc.com'):
+def load_data(  
+        subject, html_content, 
+        recipient_email:str='daniel.delasheras@longislandsc.com',
+        cc: list[str] | None = None,
+        bcc: list[str] | None = None):
     logger = get_run_logger()
     logger.info("Loading data...")
     
@@ -74,7 +78,9 @@ def load_data(subject, html_content, recipient_email:str='daniel.delasheras@long
 
     send_outlook_email(subject=subject, 
                        html_body=html_content, 
-                       recipient=recipient_email)
+                       recipient=recipient_email,
+                       cc=cc, 
+                       bcc=bcc)
 
     logger.info("Load step complete.")
 
@@ -91,7 +97,7 @@ def weekly_shopify_report_flow():
     shopify_orders_raw = extract_data()
     vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed = transform_transaction_data(shopify_orders_raw)
     subject, html = build_html_email(vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed)
-    load_data(subject=subject, html_content=html)
+    load_data(subject=subject, html_content=html, cc=['danidhg00@gmail.com'])
 
     logger.info("Flow completed successfully.")
 
