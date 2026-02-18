@@ -35,6 +35,4 @@ jobs:
           SHOPIFY_SHOP_NAME: ${{ secrets.SHOPIFY_SHOP_NAME }}
           SHOPIFY_PASSWORD: ${{ secrets.SHOPIFY_PASSWORD }}
           API_VERSION: "2024-01"
-        run: |
-          source .venv/bin/activate
-          python main.py
+        run: python main.py
