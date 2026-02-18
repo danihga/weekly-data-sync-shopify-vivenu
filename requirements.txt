@@ -6,6 +6,7 @@ pandas==2.2.2
 ShopifyAPI==12.1.0
 prefect==2.14.9
 griffe<1.0
+cachetools==5.3.3
 
 # Optional: for scheduling or GitHub Actions (if you later automate it)
 #schedule==1.2.1
