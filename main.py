@@ -60,7 +60,34 @@ def build_html_email(vivenu_total_transactions, vivenu_week_transactions, shopif
     # Combine subjects and HTML bodies
     # For simplicity, let's just use the Vivenu subject and append Shopify's HTML content
     combined_subject = vivenu_subject
-    combined_html = vivenu_html_content + "<br>" + shopify_html_content + "<p>Best,<br/>Daniel</p>"
+    combined_html = f"""
+<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+
+    <p>Hi Fred,</p>
+
+    <p>Please find below the latest ticketing and merchandise reports.</p>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+
+    <h3 style="margin-bottom: 5px;">Ticketing Report</h3>
+    <div style="margin-bottom: 20px;">
+        {vivenu_html_content}
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+
+    <h3 style="margin-bottom: 5px;">Merchandise Report</h3>
+    <div style="margin-bottom: 20px;">
+        {shopify_html_content}
+    </div>
+
+    <p style="margin-top: 30px;">
+        Best,<br/>
+        Daniel
+    </p>
+
+</div>
+"""
     
     logger.info("Building HTML Email Template complete.")
     return combined_subject, combined_html
@@ -97,7 +124,7 @@ def weekly_shopify_report_flow():
     shopify_orders_raw = extract_data()
     vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed = transform_transaction_data(shopify_orders_raw)
     subject, html = build_html_email(vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed)
-    load_data(subject=subject, html_content=html, cc=['danidhg00@gmail.com'])
+    load_data(subject=subject, html_content=html, recipient_email='fred.popp@globallconcepts.com', cc=['daniel.delasheras@longislandsc.com', 'oliver.Whaley@globallconcepts.com'])
 
     logger.info("Flow completed successfully.")
 

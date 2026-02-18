@@ -212,12 +212,9 @@ def render_vivenu_weekly_email_html(
     start = end - timedelta(days=7)
     start_str = start.strftime("%b %d")
     end_str = end.strftime("%b %d")
-    subject = f"Vivenu Weekly Report ({start_str}–{end_str})"
+    subject = f"Weekly Merchandise and Ticketing Report ({start_str}–{end_str})"
 
     html = f"""
-    <p>Hi Fred,</p>
-    <p>Here’s the weekly Vivenu report.</p>
-
     <h4 style="margin-bottom:4px;"> Ticket Sales Report Since Launch {since_date}</h4>
     <ul>
       <li><strong>Total Transaction Volume:</strong> {fmt_money(revenue_total)}</li>
