@@ -340,6 +340,6 @@ if __name__ == "__main__":
     send_outlook_email(subject, 
                        html, 
                        recipient="fred.popp@globallconcepts.com",
-                       cc=['daniel.delasheras@longislandsc.com'])
+                       cc=['daniel.delasheras@longislandsc.com', 'oliver.Whaley@globallconcepts.com'])
     print("Subject:", subject)
     print("HTML Body:", html)   
