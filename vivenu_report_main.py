@@ -85,7 +85,10 @@ def fetch_total_transactions() -> tuple[float, int, int, int]:
     premium, reserved = fetch_premium_reserved_tickets(transactions)
     number_ticket_purchases = fetch_number_orders(transactions)
     
-    return total_revenue, number_ticket_purchases, premium, reserved
+    return {'total_revenue':total_revenue, 
+            'total_number_ticket_purchases':number_ticket_purchases, 
+            'total_premium':premium, 
+            'total_reserved':reserved}
 
 
 # ==============================
@@ -123,22 +126,39 @@ def fetch_transaction_last_week(days: int = 7) -> tuple[float, str, int, int]:
 
     number_ticket_purchases = fetch_number_orders(cutoff_transactions)
     
-    return sum_revenue, completion, premium, reserved, number_ticket_purchases
+    return {
+        "week_sum_revenue": sum_revenue,
+        "week_completion": completion,
+        "week_premium": premium,
+        "week_reserved": reserved,
+        "week_number_ticket_purchases": number_ticket_purchases
+    }
 
 def fmt_money(x): 
     return f"${x:,.2f}"
 
-def render_vivenu_weekly_email(
-    revenue_total, total_num_orders, total_premium, total_reserved,
-    revenue_week, completions_week, premium_week, reserved_week, orders_week,
-    since_date="2025-11-10"
+def _render_vivenu_weekly_email_text(
+        total_vivenu_transactions:dict,
+        week_vivenu_transactions:dict,
+        since_date="2025-11-10"
 ):
+    revenue_total = total_vivenu_transactions["total_revenue"]
+    total_num_orders = total_vivenu_transactions["total_number_ticket_purchases"]
+    total_premium = total_vivenu_transactions["total_premium"]
+    total_reserved = total_vivenu_transactions["total_reserved"]
+
+    revenue_week = week_vivenu_transactions["week_sum_revenue"]
+    completions_week = week_vivenu_transactions["week_completion"]
+    premium_week = week_vivenu_transactions["week_premium"]
+    reserved_week = week_vivenu_transactions["week_reserved"]
+    orders_week = week_vivenu_transactions["week_number_ticket_purchases"]
+
     end = datetime.now(timezone.utc).astimezone()  # local time display
     start = end - timedelta(days=7)
     start_str = start.strftime("%b %d")
     end_str = end.strftime("%b %d")
 
-    subject = f"Vivenu Weekly Report ({start_str}–{end_str})"
+    subject = f"The Island FC Weekly Report ({start_str}–{end_str})"
     body = f"""Hi Fred,
 
 Here’s the weekly Vivenu report.
@@ -155,31 +175,13 @@ Weekly Report ({start_str}–{end_str})
 • Transactions: {orders_week:,} total
 • Increase in Deposits: {premium_week:,} Premium, {reserved_week:,} Reserved
 
-If you’d like, I can break this down by event or sales channel next.
-
-Best,
-Daniel
 """
-    return subject, body
-
-revenue_total, total_num_orders, total_premium, total_reserved = fetch_total_transactions()
-revenue_week, completions_week, premium_week,  reserved_week, orders_week = fetch_transaction_last_week()
-
-# Example usage with your variables:
-subject, body = render_vivenu_weekly_email(
-    revenue_total, total_num_orders, total_premium, total_reserved,
-    revenue_week, completions_week, premium_week, reserved_week, orders_week
-)
+    return (subject, body)
 
 # -----------------------------
 # 0) Config: load secrets
 # -----------------------------
-load_dotenv()
-
-CLIENT_ID     = os.getenv("OUTLOOK_CLIENT_ID")
-TENANT_ID     = os.getenv("OUTLOOK_TENANT_ID")
-CLIENT_SECRET = os.getenv("OUTLOOK_CLIENT_SECRET")
-SENDER_EMAIL  = os.getenv("OUTLOOK_USER_EMAIL")  # the Outlook mailbox to send from
+# the Outlook mailbox to send from
 
 # -----------------------------
 # 1) Helpers to format the report
@@ -191,10 +193,21 @@ def fmt_money(x):
         return str(x)
 
 def render_vivenu_weekly_email_html(
-    revenue_total, total_num_orders, total_premium, total_reserved,
-    revenue_week, completions_week, premium_week, reserved_week, orders_week,
+    total_vivenu_transactions: dict,
+    week_vivenu_transactions: dict,
     since_date="2025-11-10"
 ):
+    revenue_total = total_vivenu_transactions['total_revenue']
+    total_num_orders = total_vivenu_transactions['total_number_ticket_purchases']
+    total_premium = total_vivenu_transactions['total_premium']
+    total_reserved = total_vivenu_transactions['total_reserved']
+
+    revenue_week = week_vivenu_transactions['week_sum_revenue']
+    completions_week = week_vivenu_transactions['week_completion']
+    premium_week = week_vivenu_transactions['week_premium']
+    reserved_week = week_vivenu_transactions['week_reserved']
+    orders_week = week_vivenu_transactions['week_number_ticket_purchases']
+
     end = datetime.now(timezone.utc).astimezone()
     start = end - timedelta(days=7)
     start_str = start.strftime("%b %d")
@@ -205,7 +218,7 @@ def render_vivenu_weekly_email_html(
     <p>Hi Fred,</p>
     <p>Here’s the weekly Vivenu report.</p>
 
-    <h4 style="margin-bottom:4px;">Membership Report Since Launch {since_date}</h4>
+    <h4 style="margin-bottom:4px;"> Ticket Sales Report Since Launch {since_date}</h4>
     <ul>
       <li><strong>Total Transaction Volume:</strong> {fmt_money(revenue_total)}</li>
       <li><strong>Online Sales:</strong> {int(total_num_orders):,}</li>
@@ -221,7 +234,6 @@ def render_vivenu_weekly_email_html(
       <li><strong>Increase in Deposits:</strong> {int(premium_week):,} Premium, {int(reserved_week):,} Reserved</li>
     </ul>
 
-    <p>Best,<br/>Daniel</p>
     """
     return subject, html
 
@@ -229,41 +241,6 @@ def render_vivenu_weekly_email_html(
 # 2) Send email via Microsoft Graph
 #    (Application permission: Mail.Send)
 # -----------------------------
-'''
-def send_outlook_email(subject: str, html_body: str, recipient: str):
-    authority = f"https://login.microsoftonline.com/{TENANT_ID}"
-    app = ConfidentialClientApplication(
-        client_id=CLIENT_ID,
-        authority=authority,
-        client_credential=CLIENT_SECRET,
-    )
-
-    token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    if "access_token" not in token:
-        raise RuntimeError(f"Auth failed: {token.get('error_description', token)}")
-
-    # With application permissions, use /users/{user-id-or-email}/sendMail
-    endpoint = f"https://graph.microsoft.com/v1.0/users/{SENDER_EMAIL}/sendMail"
-    payload = {
-        "message": {
-            "subject": subject,
-            "body": {"contentType": "HTML", "content": html_body},
-            "toRecipients": [{"emailAddress": {"address": recipient}}],
-        },
-        "saveToSentItems": True,
-    }
-
-    resp = requests.post(
-        endpoint,
-        headers={"Authorization": f"Bearer {token['access_token']}",
-                 "Content-Type": "application/json"},
-        json=payload,
-        timeout=30,
-    )
-    resp.raise_for_status()
-    print(f"✅ Email sent to {recipient}")
-    '''
-
 def send_outlook_email(
     subject: str,
     html_body: str,
@@ -271,11 +248,11 @@ def send_outlook_email(
     cc: list[str] | None = None,
     bcc: list[str] | None = None,
 ):
-    authority = f"https://login.microsoftonline.com/{TENANT_ID}"
+    authority = f"https://login.microsoftonline.com/{os.getenv('OUTLOOK_TENANT_ID')}"
     app = ConfidentialClientApplication(
-        client_id=CLIENT_ID,
+        client_id=os.getenv("OUTLOOK_CLIENT_ID"),
         authority=authority,
-        client_credential=CLIENT_SECRET,
+        client_credential=os.getenv("OUTLOOK_CLIENT_SECRET"),
     )
 
     token = app.acquire_token_for_client(
@@ -284,7 +261,7 @@ def send_outlook_email(
     if "access_token" not in token:
         raise RuntimeError(f"Auth failed: {token.get('error_description', token)}")
 
-    endpoint = f"https://graph.microsoft.com/v1.0/users/{SENDER_EMAIL}/sendMail"
+    endpoint = f"https://graph.microsoft.com/v1.0/users/{os.getenv('OUTLOOK_USER_EMAIL')}/sendMail"
 
     message = {
         "subject": subject,
@@ -325,21 +302,3 @@ def send_outlook_email(
     resp.raise_for_status()
     print(f"✅ Email sent to {recipient}")
 
-if __name__ == "__main__":
-    # These variables should already come from your earlier code:
-    # revenue_total, total_num_orders, total_premium, total_reserved = fetch_total_transactions()
-    # revenue_week, completions_week, premium_week, reserved_week, orders_week = fetch_transaction_last_week()
-
-    # For example, assume they are defined in your runtime:
-    subject, html = render_vivenu_weekly_email_html(
-        revenue_total, total_num_orders, total_premium, total_reserved,
-        revenue_week, completions_week, premium_week, reserved_week, orders_week
-    )
-
-    # Send to Gmail recipient
-    send_outlook_email(subject, 
-                       html, 
-                       recipient="fred.popp@globallconcepts.com",
-                       cc=['daniel.delasheras@longislandsc.com', 'oliver.Whaley@globallconcepts.com'])
-    print("Subject:", subject)
-    print("HTML Body:", html)   

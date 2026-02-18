@@ -18,7 +18,8 @@ def test_shopify_connection():
 
     try:
         response = requests.get(url, auth=(SHOPIFY_API_KEY, SHOPIFY_API_SECRET), timeout=20)
-        print("🔍 Status Code:", response.status_code)
+        print("🔍 Status Code:"
+              , response.status_code)
 
         if response.status_code == 200:
             data = response.json()
