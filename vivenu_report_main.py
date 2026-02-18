@@ -229,6 +229,7 @@ def render_vivenu_weekly_email_html(
 # 2) Send email via Microsoft Graph
 #    (Application permission: Mail.Send)
 # -----------------------------
+'''
 def send_outlook_email(subject: str, html_body: str, recipient: str):
     authority = f"https://login.microsoftonline.com/{TENANT_ID}"
     app = ConfidentialClientApplication(
@@ -261,6 +262,68 @@ def send_outlook_email(subject: str, html_body: str, recipient: str):
     )
     resp.raise_for_status()
     print(f"✅ Email sent to {recipient}")
+    '''
+
+def send_outlook_email(
+    subject: str,
+    html_body: str,
+    recipient: str,
+    cc: list[str] | None = None,
+    bcc: list[str] | None = None,
+):
+    authority = f"https://login.microsoftonline.com/{TENANT_ID}"
+    app = ConfidentialClientApplication(
+        client_id=CLIENT_ID,
+        authority=authority,
+        client_credential=CLIENT_SECRET,
+    )
+
+    token = app.acquire_token_for_client(
+        scopes=["https://graph.microsoft.com/.default"]
+    )
+    if "access_token" not in token:
+        raise RuntimeError(f"Auth failed: {token.get('error_description', token)}")
+
+    endpoint = f"https://graph.microsoft.com/v1.0/users/{SENDER_EMAIL}/sendMail"
+
+    message = {
+        "subject": subject,
+        "body": {
+            "contentType": "HTML",
+            "content": html_body
+        },
+        "toRecipients": [
+            {"emailAddress": {"address": recipient}}
+        ],
+    }
+
+    if cc:
+        message["ccRecipients"] = [
+            {"emailAddress": {"address": email}} for email in cc
+        ]
+
+    if bcc:
+        message["bccRecipients"] = [
+            {"emailAddress": {"address": email}} for email in bcc
+        ]
+
+    payload = {
+        "message": message,
+        "saveToSentItems": True,
+    }
+
+    resp = requests.post(
+        endpoint,
+        headers={
+            "Authorization": f"Bearer {token['access_token']}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=30,
+    )
+
+    resp.raise_for_status()
+    print(f"✅ Email sent to {recipient}")
 
 if __name__ == "__main__":
     # These variables should already come from your earlier code:
@@ -274,4 +337,9 @@ if __name__ == "__main__":
     )
 
     # Send to Gmail recipient
-    send_outlook_email(subject, html, recipient="daniel.delasheras@longislandsc.com")
+    send_outlook_email(subject, 
+                       html, 
+                       recipient="fred.popp@globallconcepts.com",
+                       cc=['daniel.delasheras@longislandsc.com'])
+    print("Subject:", subject)
+    print("HTML Body:", html)   
