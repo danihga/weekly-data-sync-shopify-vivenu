@@ -2,7 +2,7 @@ name: Weekly Vivenu Report
 
 on:
   schedule:
-    - cron: '0 17 * * 1'   # 02:00 AM ET (07:00 UTC) daily
+    - cron: '0 17 * * 1'  
   workflow_dispatch:    # allow manual run from GitHub
 
 jobs:
@@ -20,8 +20,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -32,6 +30,11 @@ jobs:
           OUTLOOK_TENANT_ID: ${{ secrets.OUTLOOK_TENANT_ID }}
           OUTLOOK_CLIENT_SECRET: ${{ secrets.OUTLOOK_CLIENT_SECRET }}
           OUTLOOK_USER_EMAIL: ${{ secrets.OUTLOOK_USER_EMAIL }}
+          SHOPIFY_API_KEY: ${{ secrets.SHOPIFY_API_KEY }}
+          SHOPIFY_API_SECRET: ${{ secrets.SHOPIFY_API_SECRET }}
+          SHOPIFY_SHOP_NAME: ${{ secrets.SHOPIFY_SHOP_NAME }}
+          SHOPIFY_PASSWORD: ${{ secrets.SHOPIFY_PASSWORD }}
+          API_VERSION: "2024-01"
         run: |
           source .venv/bin/activate
           python vivenu_report_main.py
