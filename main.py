@@ -124,7 +124,7 @@ def weekly_shopify_report_flow():
     shopify_orders_raw = extract_data()
     vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed = transform_transaction_data(shopify_orders_raw)
     subject, html = build_html_email(vivenu_total_transactions, vivenu_week_transactions, shopify_data_processed)
-    load_data(subject=subject, html_content=html, recipient_email='fred.popp@globallconcepts.com', cc=['daniel.delasheras@longislandsc.com', 'oliver.Whaley@globallconcepts.com'])
+    load_data(subject=subject, html_content=html, recipient_email='fred.popp@globallconcepts.com', cc=['daniel.delasheras@longislandsc.com', 'oliver.Whaley@globallconcepts.com', 'travis.lamprecht@theislandfc.com'])
 
     logger.info("Flow completed successfully.")
 
