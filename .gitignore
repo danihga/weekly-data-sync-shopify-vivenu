@@ -14,3 +14,8 @@ __pycache__/
 # Jupyter
 .ipynb
 .ipynb_checkpoints/
+
+# Local contact datasets (never commit — data stays on this machine only)
+data/*.csv
+data/*.xlsx
+data/*.xls

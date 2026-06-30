@@ -23,6 +23,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Write GCS service account key
+        run: echo '${{ secrets.GCS_SERVICE_ACCOUNT_KEY }}' > /tmp/gcs-key.json
+
       - name: Run Vivenu report script
         env:
           VIVENU_API_KEY: ${{ secrets.VIVENU_API_KEY }}
@@ -35,4 +38,8 @@ jobs:
           SHOPIFY_SHOP_NAME: ${{ secrets.SHOPIFY_SHOP_NAME }}
           SHOPIFY_PASSWORD: ${{ secrets.SHOPIFY_PASSWORD }}
           API_VERSION: "2024-01"
+          HUBSPOT_API_KEY: ${{ secrets.HUBSPOT_API_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcs-key.json
+          PM_BUCKET_TIFC_EAST: ${{ secrets.PM_BUCKET_TIFC_EAST }}
+          PM_BUCKET_TIFC_WEST: ${{ secrets.PM_BUCKET_TIFC_WEST }}
         run: python main.py
